@@ -5,12 +5,17 @@ import {
   Search,
   ArrowRight,
   Plus,
+  ChevronRight,
+  MapPin,
+  Clock,
+  ShieldCheck,
 } from "lucide-react";
 import { collegeConfig } from "@/config/college";
 import { api } from "@/data/api";
 import { type Item } from "@/data/items";
 import { subscribeToNewItems } from "@/data/realtime";
-import { ItemCard, getCategoryIcon } from "@/components/ui/ItemCard";
+import { getCategoryIcon } from "@/components/ui/ItemCard";
+import { StatusChip } from "@/motion/StatusChip";
 import { HowItWorks } from "@/components/home/HowItWorks";
 import { CollectionDesk } from "@/components/home/CollectionDesk";
 import { Skeleton } from "@/motion/Skeleton";
@@ -18,12 +23,12 @@ import { Reveal } from "@/motion/Reveal";
 import { easings, durations, delays } from "@/motion/tokens";
 
 const quickPicks = [
-  { label: "ID card", query: "ID card" },
-  { label: "Keys", query: "Keys" },
-  { label: "Phone", query: "Phone" },
-  { label: "Bag", query: "Backpack" },
-  { label: "Calculator", query: "Calculator" },
-  { label: "Water bottle", query: "Water bottle" },
+  { label: "Hostel keys", count: 12, query: "Keys" },
+  { label: "Student IDs", count: 8, query: "ID card" },
+  { label: "Phones & earbuds", count: 15, query: "Phone" },
+  { label: "Backpacks", count: 7, query: "Backpack" },
+  { label: "Calculators", count: 6, query: "Calculator" },
+  { label: "Water bottles", count: 18, query: "Water bottle" },
 ];
 
 export const Home: React.FC = () => {
@@ -176,7 +181,7 @@ export const Home: React.FC = () => {
                 </div>
               </div>
 
-              {/* 56px Search Input with attached Category Select */}
+              {/* Institutional Search Inquiry Terminal */}
               <motion.form
                 onSubmit={handleSearchSubmit}
                 initial={{ opacity: 0, y: 12 }}
@@ -186,8 +191,19 @@ export const Home: React.FC = () => {
                   ease: easings.out,
                   delay: 0.22,
                 }}
-                className="relative"
+                className="space-y-2"
               >
+                {/* Terminal Header Bar */}
+                <div className="flex items-center justify-between text-[11px] text-ink-muted px-1">
+                  <span className="font-medium flex items-center gap-1.5 text-campus-green font-semibold">
+                    <span className="w-1.5 h-1.5 rounded-full bg-campus-green" />
+                    Intake query terminal
+                  </span>
+                  <span className="hidden sm:inline font-mono text-[11px] bg-paper px-1.5 py-0.5 rounded border border-line text-ink-muted">
+                    Press Enter to search
+                  </span>
+                </div>
+
                 <div className="h-14 bg-surface rounded-[6px] border border-line shadow-subtle flex items-center transition-colors focus-within:border-campus-green focus-within:ring-2 focus-within:ring-campus-green focus-within:ring-offset-2">
                   {/* Left Search Icon */}
                   <div className="pl-4 pr-2 text-ink-muted shrink-0 pointer-events-none">
@@ -199,8 +215,8 @@ export const Home: React.FC = () => {
                     type="text"
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    placeholder="Search by keywords, brand, or code (e.g. Casio, blue keys)"
-                    className="flex-1 h-full px-2 text-[15px] text-ink placeholder:text-ink-muted/70 bg-transparent outline-none min-w-0"
+                    placeholder="Search by article, brand, location, or LF code..."
+                    className="flex-1 h-full px-2 text-[14px] text-ink placeholder:text-ink-muted/70 bg-transparent outline-none min-w-0"
                   />
 
                   {/* Vertical separator */}
@@ -227,15 +243,16 @@ export const Home: React.FC = () => {
                   <div className="pr-1.5 shrink-0">
                     <button
                       type="submit"
-                      className="h-11 px-4 bg-campus-green text-surface rounded-[6px] text-[14px] font-medium hover:bg-[#16493C] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-campus-green cursor-pointer shrink-0"
+                      className="h-11 px-4 bg-campus-green text-surface rounded-[6px] text-[13px] font-medium hover:bg-[#16493C] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-campus-green cursor-pointer shrink-0 inline-flex items-center gap-1.5"
                     >
-                      Search
+                      <span>Search repository</span>
+                      <ArrowRight className="w-3.5 h-3.5" strokeWidth={1.5} />
                     </button>
                   </div>
                 </div>
               </motion.form>
 
-              {/* Quick-Pick Chips (stagger in after search box) */}
+              {/* Common Article Inventory Chips */}
               <motion.div
                 initial="initial"
                 animate="animate"
@@ -247,10 +264,10 @@ export const Home: React.FC = () => {
                     },
                   },
                 }}
-                className="flex flex-wrap items-center gap-2 pt-1"
+                className="flex flex-wrap items-center gap-2 pt-0.5"
               >
-                <span className="text-[13px] text-ink-muted font-medium mr-1">
-                  Common articles:
+                <span className="text-[12px] text-ink-muted font-medium mr-0.5">
+                  Frequent intakes:
                 </span>
                 {quickPicks.map((chip) => (
                   <motion.button
@@ -265,38 +282,46 @@ export const Home: React.FC = () => {
                       },
                     }}
                     onClick={() => handleQuickPick(chip.query)}
-                    className="px-2.5 py-1 text-[13px] font-medium bg-paper text-ink border border-line rounded-[6px] hover:border-campus-green hover:text-campus-green transition-colors cursor-pointer select-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-campus-green"
+                    className="inline-flex items-center gap-1.5 px-2.5 py-1 text-[12px] font-medium bg-surface text-ink border border-line rounded-[6px] hover:border-campus-green hover:text-campus-green transition-colors cursor-pointer select-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-campus-green"
                   >
-                    {chip.label}
+                    <span>{chip.label}</span>
+                    <span className="font-mono text-[10px] text-ink-muted bg-paper px-1 py-0.2 rounded border border-line">
+                      {chip.count}
+                    </span>
                   </motion.button>
                 ))}
               </motion.div>
             </div>
 
-            {/* Right 5 Columns: "Handed in today" Live Panel */}
+            {/* Right 5 Columns: Active Custody Manifest Feed */}
             <div className="lg:col-span-5">
-              <div className="bg-paper border border-line rounded-[12px] p-5 shadow-subtle space-y-4">
-                <div className="flex items-center justify-between border-b border-line pb-3">
-                  <div className="flex items-center gap-2">
-                    <span className="w-2 h-2 rounded-full bg-campus-green animate-pulse" />
-                    <h3 className="text-[15px] font-semibold text-ink leading-tight">
-                      Handed in today
-                    </h3>
+              <div className="bg-paper border border-line rounded-[12px] p-4 sm:p-5 shadow-subtle space-y-4">
+                <div className="flex items-start justify-between border-b border-line pb-3">
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <span className="w-2 h-2 rounded-full bg-campus-green animate-pulse" />
+                      <h3 className="text-[14px] font-semibold text-ink leading-tight uppercase tracking-wide">
+                        Live custody manifest
+                      </h3>
+                    </div>
+                    <p className="text-[12px] text-ink-muted mt-0.5">
+                      Intake Vault Room 104 · Realtime physical intake
+                    </p>
                   </div>
 
-                  {/* Intake simulator button to test layout animation & amber outline */}
+                  {/* Attendant intake test simulator */}
                   <button
                     type="button"
                     onClick={handleSimulateNewIntake}
-                    title="Simulate a new intake arriving at the desk"
-                    className="inline-flex items-center gap-1 text-[12px] font-medium text-campus-green hover:underline cursor-pointer"
+                    title="Simulate intake arrival at custody desk"
+                    className="inline-flex items-center gap-1 text-[11px] font-medium text-campus-green bg-green-tint/60 px-2 py-1 rounded-[4px] border border-campus-green/20 hover:bg-green-tint transition-colors cursor-pointer shrink-0"
                   >
-                    <Plus className="w-3.5 h-3.5" strokeWidth={1.5} />
+                    <Plus className="w-3 h-3" strokeWidth={1.5} />
                     <span>Simulate intake</span>
                   </button>
                 </div>
 
-                {/* 4 Rows sliding in 0.07s apart after headline settles */}
+                {/* Rows sliding in after headline settles */}
                 <div className="space-y-2.5">
                   <AnimatePresence initial={true}>
                     {todayItems.map((item, idx) => {
@@ -328,16 +353,16 @@ export const Home: React.FC = () => {
                             className="flex items-center gap-3 min-w-0 flex-1 outline-none group"
                           >
                             {/* Small Category Colour Block with Lucide Icon */}
-                            <div className="w-10 h-10 rounded-[6px] bg-[#ECEFEA] border border-line/80 flex items-center justify-center shrink-0">
+                            <div className="w-9 h-9 rounded-[6px] bg-[#ECEFEA] border border-line/80 flex items-center justify-center shrink-0 text-ink-muted">
                               {getCategoryIcon(item.category)}
                             </div>
 
                             {/* Title & Location */}
                             <div className="min-w-0 flex-1">
-                              <h4 className="text-[14px] font-semibold text-ink truncate leading-tight group-hover:text-campus-green transition-colors">
+                              <h4 className="text-[13px] font-semibold text-ink truncate leading-tight group-hover:text-campus-green transition-colors">
                                 {item.title}
                               </h4>
-                              <p className="text-[12px] text-ink-muted truncate mt-0.5">
+                              <p className="text-[11px] text-ink-muted truncate mt-0.5">
                                 {item.location}
                               </p>
                             </div>
@@ -345,10 +370,10 @@ export const Home: React.FC = () => {
 
                           {/* Time Ago & Ref Code */}
                           <div className="shrink-0 text-right">
-                            <span className="font-mono text-[11px] font-semibold text-ink block bg-paper px-1.5 py-0.5 rounded-[4px] border border-line">
+                            <span className="font-mono text-[11px] font-bold text-ink block bg-paper px-1.5 py-0.5 rounded-[4px] border border-line">
                               {item.refCode}
                             </span>
-                            <span className="text-[11px] text-ink-muted block mt-0.5">
+                            <span className="text-[10px] text-ink-muted block mt-0.5 font-medium">
                               {item.timeAgo}
                             </span>
                           </div>
@@ -358,12 +383,13 @@ export const Home: React.FC = () => {
                   </AnimatePresence>
                 </div>
 
-                <div className="pt-2 text-center">
+                <div className="pt-2 border-t border-line flex items-center justify-between text-[12px]">
+                  <span className="text-ink-muted">Vault status: Physical hold</span>
                   <Link
                     to="/browse"
-                    className="text-[13px] font-medium text-campus-green hover:underline inline-flex items-center gap-1"
+                    className="font-medium text-campus-green hover:underline inline-flex items-center gap-1"
                   >
-                    <span>View all intake property</span>
+                    <span>Open full manifest</span>
                     <ArrowRight className="w-3.5 h-3.5" strokeWidth={1.5} />
                   </Link>
                 </div>
@@ -374,44 +400,55 @@ export const Home: React.FC = () => {
       </section>
 
       {/* =========================================================================
-          SECTION 2: RECENTLY FOUND
-          8 ItemCards in 4-column grid (2 on mobile). Grid group fades in once on scroll.
+          SECTION 2: CAMPUS INTAKE REGISTRY & CUSTODY LEDGER
+          Editorial asymmetric layout: featured inspection article on left,
+          dense tabular intake register on right. Eliminates repetitive card grid.
           ========================================================================= */}
       <section className="max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
-        <div className="flex items-center justify-between border-b border-line pb-3">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 border-b border-line pb-3">
           <div>
-            <h2 className="type-h2 text-ink">Recently found property</h2>
-            <p className="type-small text-ink-muted mt-1">
-              Articles located on campus and verified in the central intake repository.
+            <div className="flex items-center gap-2 text-[12px] text-campus-green font-semibold uppercase tracking-wider">
+              <ShieldCheck className="w-4 h-4" strokeWidth={1.5} />
+              <span>Campus custody intake registry</span>
+            </div>
+            <h2 className="type-h2 text-ink mt-0.5">Surrendered property ledger</h2>
+            <p className="type-small text-ink-muted mt-0.5">
+              Articles delivered to campus safety intake desks and secured in the central property vault.
             </p>
           </div>
           <Link
             to="/browse"
-            className="text-[14px] font-medium text-campus-green hover:underline inline-flex items-center gap-1 shrink-0"
+            className="text-[14px] font-medium text-campus-green hover:underline inline-flex items-center gap-1 shrink-0 self-start sm:self-auto"
           >
-            <span>See all items</span>
+            <span>Search full registry</span>
             <ArrowRight className="w-4 h-4" strokeWidth={1.5} />
           </Link>
         </div>
 
-        {/* The grid group fades in once on scroll, not each individual card */}
+        {/* The section reveals once on scroll */}
         <Reveal yOffset={16}>
           {loadingRecent ? (
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
-              {Array.from({ length: 8 }).map((_, i) => (
-                <div
-                  key={i}
-                  className="bg-surface border border-line rounded-[12px] p-3.5 shadow-subtle space-y-3"
-                >
-                  <Skeleton shape="rect" className="w-full aspect-[4/3] rounded-[8px]" />
-                  <Skeleton className="h-4 w-3/4" />
-                  <Skeleton className="h-3 w-1/2" />
-                  <div className="pt-2 border-t border-line flex justify-between">
-                    <Skeleton className="h-4 w-16 rounded-full" />
-                    <Skeleton className="h-3 w-12" />
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+              <div className="lg:col-span-5 bg-surface border border-line rounded-[12px] p-5 space-y-4 shadow-subtle">
+                <Skeleton shape="rect" className="w-full aspect-[4/3] rounded-[8px]" />
+                <Skeleton className="h-6 w-3/4" />
+                <Skeleton className="h-4 w-1/2" />
+                <Skeleton className="h-20 w-full rounded-[6px]" />
+              </div>
+              <div className="lg:col-span-7 bg-surface border border-line rounded-[12px] divide-y divide-line overflow-hidden shadow-subtle">
+                {Array.from({ length: 5 }).map((_, i) => (
+                  <div key={i} className="p-4 flex items-center justify-between gap-4">
+                    <div className="flex items-center gap-3 flex-1">
+                      <Skeleton className="w-9 h-9 rounded-[6px]" />
+                      <div className="space-y-1.5 flex-1">
+                        <Skeleton className="h-4 w-48" />
+                        <Skeleton className="h-3 w-32" />
+                      </div>
+                    </div>
+                    <Skeleton className="h-5 w-20 rounded-full" />
                   </div>
-                </div>
-              ))}
+                ))}
+              </div>
             </div>
           ) : hasError ? (
             <div className="bg-surface border border-line rounded-[12px] p-8 text-center space-y-3">
@@ -426,13 +463,155 @@ export const Home: React.FC = () => {
                 Reload page
               </button>
             </div>
-          ) : (
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
-              {recentItems.map((item) => (
-                <ItemCard key={item.id} item={item} />
-              ))}
+          ) : recentItems.length > 0 ? (
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+              {/* Left 5 cols: Featured Intake Inspection Showcase */}
+              {recentItems[0] && (
+                <div className="lg:col-span-5 bg-surface border border-line rounded-[12px] p-5 shadow-subtle flex flex-col justify-between space-y-4">
+                  <div>
+                    {/* Top Stamp Bar */}
+                    <div className="flex items-center justify-between gap-2 pb-3 border-b border-line text-[12px]">
+                      <div className="flex items-center gap-1.5 text-ink-muted font-medium">
+                        <Clock className="w-3.5 h-3.5 text-campus-green shrink-0" strokeWidth={1.5} />
+                        <span>Surrendered {recentItems[0].timeAgo}</span>
+                      </div>
+                      <span className="font-mono text-[12px] font-bold text-ink bg-tag-amber/25 text-[#73510A] px-2 py-0.5 rounded-[4px] border border-tag-amber/40">
+                        {recentItems[0].refCode}
+                      </span>
+                    </div>
+
+                    {/* Image / Inspection block */}
+                    <div className="relative w-full aspect-[4/3] rounded-[8px] overflow-hidden bg-[#ECEFEA] border border-line/60 my-3.5">
+                      {recentItems[0].photo ? (
+                        <img
+                          src={recentItems[0].photo}
+                          alt={recentItems[0].title}
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        <div className="w-full h-full flex flex-col items-center justify-center gap-2 text-center p-4">
+                          <div className="w-14 h-14 rounded-[8px] bg-surface border border-line flex items-center justify-center shadow-subtle text-campus-green">
+                            {getCategoryIcon(recentItems[0].category)}
+                          </div>
+                          <span className="text-[12px] font-medium text-ink-muted capitalize">
+                            {recentItems[0].category.replace("-", " ")}
+                          </span>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Item Details */}
+                    <div className="space-y-1.5">
+                      <div className="flex items-center justify-between gap-2">
+                        <StatusChip status={recentItems[0].status} />
+                        <span className="text-[12px] text-ink-muted">Room 104 Vault</span>
+                      </div>
+                      <h3 className="text-[17px] font-semibold text-ink leading-snug pt-1">
+                        {recentItems[0].title}
+                      </h3>
+                      <p className="text-[13px] text-ink-muted line-clamp-2 leading-relaxed">
+                        {recentItems[0].description}
+                      </p>
+                    </div>
+
+                    {/* Physical custody metadata */}
+                    <div className="mt-4 p-3 bg-paper rounded-[6px] border border-line space-y-1.5 text-[12px] text-ink-muted">
+                      <div className="flex items-center gap-2">
+                        <MapPin className="w-3.5 h-3.5 text-campus-green shrink-0" strokeWidth={1.5} />
+                        <span className="truncate">Surrendered at: <strong className="text-ink font-medium">{recentItems[0].location}</strong></span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <ShieldCheck className="w-3.5 h-3.5 text-campus-green shrink-0" strokeWidth={1.5} />
+                        <span className="truncate">Custody hold: <span className="text-ink font-medium">{recentItems[0].currentlyHeldAt}</span></span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="pt-2">
+                    <Link
+                      to={`/items/${recentItems[0].id}`}
+                      className="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-[6px] bg-campus-green text-surface text-[14px] font-medium hover:bg-[#16473A] transition-colors"
+                    >
+                      <span>Inspect article and file claim</span>
+                      <ArrowRight className="w-4 h-4" strokeWidth={1.5} />
+                    </Link>
+                  </div>
+                </div>
+              )}
+
+              {/* Right 7 cols: Dense Custody Ledger */}
+              <div className="lg:col-span-7 bg-surface border border-line rounded-[12px] overflow-hidden shadow-subtle flex flex-col justify-between">
+                <div>
+                  <div className="px-4 sm:px-5 py-3 border-b border-line bg-paper/60 flex items-center justify-between">
+                    <span className="text-[12px] font-semibold text-ink uppercase tracking-wider">
+                      Recent property entries
+                    </span>
+                    <span className="text-[12px] text-ink-muted">
+                      Intake custody queue
+                    </span>
+                  </div>
+
+                  <div className="divide-y divide-line">
+                    {recentItems.slice(1, 6).map((item) => (
+                      <Link
+                        key={item.id}
+                        to={`/items/${item.id}`}
+                        className="p-3.5 sm:p-4 flex items-center justify-between gap-3 sm:gap-4 hover:bg-paper/70 transition-colors group"
+                      >
+                        <div className="flex items-center gap-3 sm:gap-3.5 min-w-0 flex-1">
+                          {/* Ref code tag */}
+                          <div className="shrink-0 flex flex-col items-center">
+                            <span className="font-mono text-[11px] font-bold text-ink bg-paper px-1.5 py-0.5 rounded-[4px] border border-line">
+                              {item.refCode}
+                            </span>
+                          </div>
+
+                          {/* Category icon */}
+                          <div className="w-8 h-8 rounded-[6px] bg-[#ECEFEA] border border-line/70 flex items-center justify-center shrink-0 text-ink-muted">
+                            {getCategoryIcon(item.category)}
+                          </div>
+
+                          {/* Content */}
+                          <div className="min-w-0 flex-1">
+                            <h4 className="text-[14px] font-semibold text-ink truncate group-hover:text-campus-green transition-colors leading-tight">
+                              {item.title}
+                            </h4>
+                            <div className="flex items-center gap-2 text-[12px] text-ink-muted mt-0.5 truncate">
+                              <span className="truncate">{item.location}</span>
+                              <span className="text-line shrink-0">•</span>
+                              <span className="shrink-0">{item.timeAgo}</span>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Status chip & arrow */}
+                        <div className="flex items-center gap-3 shrink-0">
+                          <div className="hidden sm:block">
+                            <StatusChip status={item.status} />
+                          </div>
+                          <ChevronRight className="w-4 h-4 text-ink-muted group-hover:text-ink group-hover:translate-x-0.5 transition-all" strokeWidth={1.5} />
+                        </div>
+                      </Link>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Footer bar */}
+                <div className="p-3.5 sm:p-4 border-t border-line bg-paper/40 flex flex-col sm:flex-row items-center justify-between gap-2 text-[13px]">
+                  <span className="text-ink-muted text-center sm:text-left">
+                    All surrendered articles held under 90-day university retention.
+                  </span>
+                  <Link
+                    to="/browse"
+                    className="text-campus-green font-semibold hover:underline inline-flex items-center gap-1"
+                  >
+                    <span>View all items</span>
+                    <ArrowRight className="w-3.5 h-3.5" strokeWidth={1.5} />
+                  </Link>
+                </div>
+              </div>
             </div>
-          )}
+          ) : null}
         </Reveal>
       </section>
 

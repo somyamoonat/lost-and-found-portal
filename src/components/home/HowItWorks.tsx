@@ -1,145 +1,141 @@
-import React, { useRef } from "react";
-import { motion, useScroll, useTransform, useSpring } from "motion/react";
+import React from "react";
+import { motion, useScroll, useSpring } from "motion/react";
+import {
+  Inbox,
+  Search,
+  ShieldCheck,
+  CheckCircle2,
+  FileText,
+} from "lucide-react";
 import { springs } from "@/motion/tokens";
 
-interface StepData {
-  number: number;
+interface ProtocolPhase {
+  phase: string;
+  tag: string;
   title: string;
-  description: string;
+  icon: React.ReactNode;
+  summary: string;
+  requirement: string;
 }
 
-const steps: StepData[] = [
+const phases: ProtocolPhase[] = [
   {
-    number: 1,
-    title: "Report or search",
-    // 16 words:
-    description:
-      "File your missing property report or search the catalog of articles surrendered across campus intake desks.",
+    phase: "PHASE 01",
+    tag: "Vault Lodgment",
+    title: "Physical intake and logging",
+    icon: <Inbox className="w-5 h-5 text-campus-green" strokeWidth={1.5} />,
+    summary:
+      "Surrendered articles are cataloged within two hours of intake, photographed for internal verification, and secured in Central Library Room 104 vaults.",
+    requirement: "Confidential identifying markings are withheld from public view.",
   },
   {
-    number: 2,
-    title: "We match and notify you",
-    // 16 words:
-    description:
-      "Campus personnel cross-reference unique item descriptions and alert your student email when a potential match arrives.",
+    phase: "PHASE 02",
+    tag: "Cross-Reference",
+    title: "Loss registry matching",
+    icon: <Search className="w-5 h-5 text-campus-green" strokeWidth={1.5} />,
+    summary:
+      "The registry automatically cross-references surrendered articles against active student loss reports twice daily using category taxonomy and campus location proximity.",
+    requirement: "Potential matches dispatch automated university email alerts.",
   },
   {
-    number: 3,
-    title: "Verify it's yours",
-    // 12 words:
-    description:
-      "Confirm distinctive characteristics, unlock credentials, or serial records before custody release approval.",
+    phase: "PHASE 03",
+    tag: "Ownership Audit",
+    title: "Double-sided verification",
+    icon: <ShieldCheck className="w-5 h-5 text-campus-green" strokeWidth={1.5} />,
+    summary:
+      "Claimants must submit private proof only the owner would know—such as lock screen credentials, purchase serial invoices, or concealed scratch markings.",
+    requirement: "Desk attendants cross-verify statements against private intake notes.",
   },
   {
-    number: 4,
-    title: "Collect from the desk",
-    // 16 words:
-    description:
-      "Bring your university photo ID to Central Library Commons Room 104 to collect your verified article.",
+    phase: "PHASE 04",
+    tag: "Custody Release",
+    title: "Handover and sign-off",
+    icon: <CheckCircle2 className="w-5 h-5 text-campus-green" strokeWidth={1.5} />,
+    summary:
+      "Verified articles are released in person at Room 104 upon presenting an official university photo ID and providing a physical custody release signature.",
+    requirement: "Generates an official custody certificate archived for 90 days.",
   },
 ];
 
 export const HowItWorks: React.FC = () => {
-  const containerRef = useRef<HTMLDivElement>(null);
+  const containerRef = React.useRef<HTMLDivElement>(null);
 
-  // Track scroll progress through the sequence container
   const { scrollYProgress } = useScroll({
     target: containerRef,
-    offset: ["start 80%", "end 55%"],
+    offset: ["start 85%", "end 65%"],
   });
 
   const smoothProgress = useSpring(scrollYProgress, springs.soft);
 
   return (
-    <section className="space-y-6">
-      <div className="border-b border-line pb-3">
-        <h2 className="type-h2 text-ink">How it works</h2>
-        <p className="type-small text-ink-muted mt-1">
-          Four verified steps from reporting a lost article to safe physical retrieval.
-        </p>
+    <section ref={containerRef} className="space-y-6">
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-3 border-b border-line pb-3">
+        <div>
+          <div className="flex items-center gap-1.5 text-[12px] text-campus-green font-semibold uppercase tracking-wider mb-1">
+            <FileText className="w-4 h-4" strokeWidth={1.5} />
+            <span>Chain-of-custody standard protocol</span>
+          </div>
+          <h2 className="type-h2 text-ink">Intake and release protocol</h2>
+          <p className="type-small text-ink-muted mt-0.5">
+            Four mandatory custody phases governing surrendered property under University Regulation §4.2.
+          </p>
+        </div>
+        <span className="text-[12px] text-ink-muted shrink-0 self-start sm:self-auto font-mono bg-paper px-2 py-0.5 rounded border border-line">
+          Room 104 Standard Operating Procedure
+        </span>
       </div>
 
-      <div ref={containerRef} className="relative pl-6 sm:pl-8 py-2">
-        {/* Background track line */}
-        <div className="absolute left-[19px] sm:left-[27px] top-6 bottom-6 w-[2px] bg-line pointer-events-none" />
-
-        {/* Dynamic drawing line filled with campus-green */}
+      {/* Progress track */}
+      <div className="relative w-full h-1 bg-line rounded-full overflow-hidden">
         <motion.div
-          style={{
-            scaleY: smoothProgress,
-            transformOrigin: "top",
-          }}
-          className="absolute left-[19px] sm:left-[27px] top-6 bottom-6 w-[2px] bg-campus-green pointer-events-none"
+          style={{ scaleX: smoothProgress, transformOrigin: "left" }}
+          className="absolute inset-y-0 left-0 bg-campus-green rounded-full"
         />
+      </div>
 
-        {/* Steps List */}
-        <div className="space-y-8 sm:space-y-10">
-          {steps.map((step, idx) => {
-            const threshold = idx / (steps.length - 1);
-            return (
-              <StepItem
-                key={step.number}
-                step={step}
-                progress={smoothProgress}
-                threshold={threshold}
-              />
-            );
-          })}
-        </div>
+      {/* 2x2 Protocol Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-5 pt-1">
+        {phases.map((item, idx) => (
+          <div
+            key={item.phase}
+            className="bg-surface border border-line rounded-[10px] p-5 sm:p-6 shadow-subtle flex flex-col justify-between space-y-4 hover:border-line/80 transition-colors"
+          >
+            <div className="space-y-3">
+              {/* Card Top: Phase Tag & Icon */}
+              <div className="flex items-center justify-between pb-2.5 border-b border-line">
+                <div className="flex items-center gap-2">
+                  <span className="font-mono text-[11px] font-bold text-campus-green bg-green-tint px-2 py-0.5 rounded-[4px] border border-campus-green/20">
+                    {item.phase}
+                  </span>
+                  <span className="text-[12px] text-ink-muted font-medium">
+                    {item.tag}
+                  </span>
+                </div>
+                <div className="w-8 h-8 rounded-[6px] bg-paper border border-line flex items-center justify-center shrink-0">
+                  {item.icon}
+                </div>
+              </div>
+
+              {/* Title & Description */}
+              <div className="space-y-1.5">
+                <h3 className="text-[16px] font-semibold text-ink leading-snug">
+                  {idx + 1}. {item.title}
+                </h3>
+                <p className="text-[13px] text-ink-muted leading-relaxed">
+                  {item.summary}
+                </p>
+              </div>
+            </div>
+
+            {/* Requirement Footer */}
+            <div className="pt-3 border-t border-line text-[12px] text-ink-muted flex items-start gap-1.5 bg-paper/50 -mx-5 sm:-mx-6 -mb-5 sm:-mb-6 p-3.5 sm:px-5 rounded-b-[10px]">
+              <span className="font-semibold text-ink shrink-0">Custody Rule:</span>
+              <span className="leading-snug">{item.requirement}</span>
+            </div>
+          </div>
+        ))}
       </div>
     </section>
-  );
-};
-
-interface StepItemProps {
-  step: StepData;
-  progress: ReturnType<typeof useSpring>;
-  threshold: number;
-}
-
-const StepItem: React.FC<StepItemProps> = ({ step, progress, threshold }) => {
-  // Fill number badge when line reaches threshold
-  const isActive = useTransform(progress, (val) => val >= threshold - 0.05);
-  const [filled, setFilled] = React.useState(threshold === 0);
-
-  React.useEffect(() => {
-    return isActive.on("change", (latest) => {
-      setFilled(latest);
-    });
-  }, [isActive]);
-
-  return (
-    <div className="relative flex items-start gap-4 sm:gap-6 group">
-      {/* Step Number Circle */}
-      <motion.div
-        animate={
-          filled
-            ? {
-                backgroundColor: "#1E5B4B",
-                color: "#FFFFFF",
-                borderColor: "#1E5B4B",
-              }
-            : {
-                backgroundColor: "#FFFFFF",
-                color: "#1A2220",
-                borderColor: "#DCDFD8",
-              }
-        }
-        transition={springs.soft}
-        className="relative z-10 w-10 h-10 rounded-full border flex items-center justify-center font-bold text-[15px] shrink-0 select-none shadow-subtle -ml-5 sm:-ml-5"
-      >
-        <span>{step.number}</span>
-      </motion.div>
-
-      {/* Step Content */}
-      <div className="space-y-1 pt-1.5 max-w-[65ch]">
-        <h3 className="text-[17px] font-semibold text-ink leading-tight">
-          {step.title}
-        </h3>
-        <p className="type-body text-ink-muted text-[15px] leading-relaxed">
-          {step.description}
-        </p>
-      </div>
-    </div>
   );
 };
