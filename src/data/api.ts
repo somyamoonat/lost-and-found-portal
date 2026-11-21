@@ -44,6 +44,19 @@ export interface ReportSubmission {
   contactPhone?: string;
 }
 
+function handleSupabaseError(err: any, fallbackFn: () => any) {
+  if (
+    err?.code === "PGRST205" ||
+    (typeof err?.message === "string" && err.message.includes("in the schema cache"))
+  ) {
+    console.warn(
+      "Supabase schema cache warning: tables have not been created yet in your Supabase project. Falling back to mock data. Run supabase/migrations/20261121000000_initial_schema.sql in your Supabase SQL editor."
+    );
+    return fallbackFn();
+  }
+  throw err;
+}
+
 /**
  * Unified API gateway that delegates seamlessly to Supabase in production
  * or the in-memory mock implementation when VITE_USE_MOCK=true or credentials are missing.
@@ -54,7 +67,11 @@ export const api = {
    */
   async getItems(filter?: GetItemsFilter): Promise<{ items: Item[]; totalCount: number }> {
     if (!isMockMode && supabase) {
-      return supabaseApi.getItems(filter);
+      try {
+        return await supabaseApi.getItems(filter);
+      } catch (err) {
+        return handleSupabaseError(err, () => mockApi.getItems(filter));
+      }
     }
     return mockApi.getItems(filter);
   },
@@ -64,7 +81,11 @@ export const api = {
    */
   async getItemById(idOrRef: string): Promise<Item | null> {
     if (!isMockMode && supabase) {
-      return supabaseApi.getItemById(idOrRef);
+      try {
+        return await supabaseApi.getItemById(idOrRef);
+      } catch (err) {
+        return handleSupabaseError(err, () => mockApi.getItemById(idOrRef));
+      }
     }
     return mockApi.getItemById(idOrRef);
   },
@@ -74,7 +95,11 @@ export const api = {
    */
   async getSimilarItems(category: string, currentId: string, limit = 4): Promise<Item[]> {
     if (!isMockMode && supabase) {
-      return supabaseApi.getSimilarItems(category, currentId, limit);
+      try {
+        return await supabaseApi.getSimilarItems(category, currentId, limit);
+      } catch (err) {
+        return handleSupabaseError(err, () => mockApi.getSimilarItems(category, currentId, limit));
+      }
     }
     return mockApi.getSimilarItems(category, currentId, limit);
   },
@@ -84,7 +109,11 @@ export const api = {
    */
   async submitClaim(id: string, claimData: ClaimSubmission): Promise<{ success: boolean; refCode: string }> {
     if (!isMockMode && supabase) {
-      return supabaseApi.submitClaim(id, claimData);
+      try {
+        return await supabaseApi.submitClaim(id, claimData);
+      } catch (err) {
+        return handleSupabaseError(err, () => mockApi.submitClaim(id, claimData));
+      }
     }
     return mockApi.submitClaim(id, claimData);
   },
@@ -94,7 +123,11 @@ export const api = {
    */
   async getHandedInToday(): Promise<Item[]> {
     if (!isMockMode && supabase) {
-      return supabaseApi.getHandedInToday();
+      try {
+        return await supabaseApi.getHandedInToday();
+      } catch (err) {
+        return handleSupabaseError(err, () => mockApi.getHandedInToday());
+      }
     }
     return mockApi.getHandedInToday();
   },
@@ -104,7 +137,11 @@ export const api = {
    */
   async getRecentFound(): Promise<Item[]> {
     if (!isMockMode && supabase) {
-      return supabaseApi.getRecentFound();
+      try {
+        return await supabaseApi.getRecentFound();
+      } catch (err) {
+        return handleSupabaseError(err, () => mockApi.getRecentFound());
+      }
     }
     return mockApi.getRecentFound();
   },
@@ -114,7 +151,11 @@ export const api = {
    */
   async submitReport(data: ReportSubmission): Promise<{ success: boolean; refCode: string; item: Item }> {
     if (!isMockMode && supabase) {
-      return supabaseApi.submitReport(data);
+      try {
+        return await supabaseApi.submitReport(data);
+      } catch (err) {
+        return handleSupabaseError(err, () => mockApi.submitReport(data));
+      }
     }
     return mockApi.submitReport(data);
   },
@@ -124,7 +165,11 @@ export const api = {
    */
   async approveClaim(claimId: string, itemId?: string): Promise<{ success: boolean }> {
     if (!isMockMode && supabase) {
-      return supabaseApi.approveClaim(claimId, itemId);
+      try {
+        return await supabaseApi.approveClaim(claimId, itemId);
+      } catch (err) {
+        return handleSupabaseError(err, () => mockApi.approveClaim(claimId, itemId));
+      }
     }
     return mockApi.approveClaim(claimId, itemId);
   },
@@ -134,7 +179,11 @@ export const api = {
    */
   async withdrawReport(itemId: string): Promise<{ success: boolean }> {
     if (!isMockMode && supabase) {
-      return supabaseApi.withdrawReport(itemId);
+      try {
+        return await supabaseApi.withdrawReport(itemId);
+      } catch (err) {
+        return handleSupabaseError(err, () => mockApi.withdrawReport(itemId));
+      }
     }
     return mockApi.withdrawReport(itemId);
   },

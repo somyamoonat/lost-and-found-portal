@@ -181,7 +181,7 @@ export const supabaseApi = {
     const { data, error } = await query.maybeSingle();
     if (error) {
       console.error("Supabase getItemById error:", error);
-      return null;
+      throw error;
     }
     if (!data) return null;
 
@@ -203,7 +203,7 @@ export const supabaseApi = {
 
     if (error) {
       console.error("Supabase getSimilarItems error:", error);
-      return [];
+      throw error;
     }
 
     return (data || []).map(mapDbItemToClient);
@@ -250,7 +250,7 @@ export const supabaseApi = {
 
     if (error) {
       console.error("Supabase getHandedInToday error:", error);
-      return [];
+      throw error;
     }
 
     return (data || []).map(mapDbItemToClient);
@@ -271,7 +271,7 @@ export const supabaseApi = {
 
     if (error) {
       console.error("Supabase getRecentFound error:", error);
-      return [];
+      throw error;
     }
 
     return (data || []).map(mapDbItemToClient);
