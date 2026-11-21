@@ -30,6 +30,25 @@ export interface ClaimSubmission {
   claimantEmail?: string;
 }
 
+export interface ReportSubmission {
+  type: "lost" | "found";
+  category: string;
+  title: string;
+  description: string;
+  color?: string;
+  brand?: string;
+  building: string;
+  spot: string;
+  dateTime: string;
+  photoUrl?: string | null;
+  photoName?: string | null;
+  verificationDetail?: string;
+  handoverMethod?: "desk" | "finder_holding" | "email" | "phone" | "desk_pickup";
+  contactName: string;
+  contactEmail: string;
+  contactPhone?: string;
+}
+
 export const api = {
   /**
    * Retrieves items with simulated latency and filtering.
@@ -227,5 +246,43 @@ export const api = {
   async getRecentFound(): Promise<Item[]> {
     await simulateLatency();
     return placeholderItems.slice(0, 8);
+  },
+
+  /**
+   * Submits a newly reported lost or found item.
+   * Generates a unique LF-XXXX reference code and adds the item to the database.
+   */
+  async submitReport(data: ReportSubmission): Promise<{ success: boolean; refCode: string; item: Item }> {
+    await simulateLatency();
+    const randomId = String(Math.floor(2100 + Math.random() * 800));
+    const refCode = `LF-${randomId}`;
+
+    const newItem: Item = {
+      id: randomId,
+      refCode,
+      type: data.type,
+      title: data.title,
+      category: data.category,
+      location: data.spot ? `${data.building} (${data.spot})` : data.building,
+      buildingCode: data.building,
+      occurredAt: data.dateTime || new Date().toISOString(),
+      timeAgo: "Just now",
+      status: "open",
+      description: data.description,
+      photo: data.photoUrl || null,
+      currentlyHeldAt: data.type === "found" ? "Central Library Intake Desk" : "With claimant / unverified",
+      history: [
+        {
+          id: `h-rep-${Date.now()}`,
+          stage: "reported",
+          title: data.type === "lost" ? "Lost report filed" : "Found property filed",
+          timestamp: new Date().toISOString(),
+          description: `Filed by ${data.contactName} (${data.contactEmail})`,
+        },
+      ],
+    };
+
+    placeholderItems.unshift(newItem);
+    return { success: true, refCode, item: newItem };
   },
 };
