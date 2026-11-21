@@ -4,6 +4,20 @@
  * Photo is null (rendered as flat category color block with Lucide icons, no hotlinking).
  */
 
+export interface ItemHistoryEvent {
+  id: string;
+  stage: "reported" | "handed_in" | "vault" | "claim_received" | "returned";
+  title: string;
+  timestamp: string;
+  description: string;
+}
+
+export interface ItemThumbnail {
+  id: string;
+  label: string;
+  angle: string;
+}
+
 export interface Item {
   id: string;
   refCode: string;
@@ -17,6 +31,10 @@ export interface Item {
   photo: string | null;
   description: string;
   timeAgo: string;
+  currentlyHeldAt?: string;
+  finderNotes?: string;
+  thumbnails?: ItemThumbnail[];
+  history?: ItemHistoryEvent[];
 }
 
 export const placeholderItems: Item[] = [
