@@ -1,11 +1,13 @@
 import React, { useEffect, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { motion, useScroll, useTransform, AnimatePresence } from "motion/react";
-import { Bell, User } from "lucide-react";
+import { User, LogOut } from "lucide-react";
 import { collegeConfig } from "@/config/college";
 import { Button } from "@/components/ui/Button";
 import { springs, durations, easings } from "@/motion/tokens";
 import { slideSheetRightVariants, backdropFadeVariants } from "@/motion/variants";
+import { NotificationPopover } from "@/components/ui/NotificationPopover";
+import { useAuth } from "@/auth";
 import { cn } from "@/lib/utils";
 
 interface NavLinkItem {
@@ -32,6 +34,7 @@ export const Navbar: React.FC = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const { user, isAuthenticated, signOut } = useAuth();
 
   // Scroll-linked sticky animations
   const { scrollY } = useScroll();
@@ -140,30 +143,51 @@ export const Navbar: React.FC = () => {
               Report an item
             </Button>
 
-            {/* Notification Bell */}
-            <button
-              type="button"
-              aria-label="View notifications"
-              className="relative p-2 text-ink-muted hover:text-ink hover:bg-paper rounded-[6px] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-campus-green"
-            >
-              <Bell className="w-[18px] h-[18px]" strokeWidth={1.5} />
-              <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-campus-green" />
-            </button>
+            {/* Notification Bell Popover */}
+            <NotificationPopover />
 
             {/* User Avatar / Sign In */}
-            <Link
-              to="/sign-in"
-              className={cn(
-                "hidden sm:flex items-center gap-2 px-2.5 py-1.5 text-[13px] font-medium text-ink-muted hover:text-ink hover:bg-paper rounded-[6px] transition-colors border border-transparent hover:border-line",
-                "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-campus-green",
-                location.pathname === "/sign-in" && "text-campus-green font-semibold"
-              )}
-            >
-              <div className="w-6 h-6 rounded-full bg-paper border border-line flex items-center justify-center text-ink">
-                <User className="w-3.5 h-3.5" strokeWidth={1.5} />
+            {isAuthenticated && user ? (
+              <div className="hidden sm:flex items-center gap-1.5 pl-1">
+                <Link
+                  to="/my-reports"
+                  className={cn(
+                    "flex items-center gap-2 px-2.5 py-1.5 text-[13px] font-medium text-ink-muted hover:text-ink hover:bg-paper rounded-[6px] transition-colors border border-transparent hover:border-line",
+                    "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-campus-green",
+                    location.pathname === "/my-reports" && "text-campus-green font-semibold"
+                  )}
+                  title={`Signed in as ${user.email}`}
+                >
+                  <div className="w-6 h-6 rounded-full bg-green-tint text-campus-green font-semibold text-[11px] flex items-center justify-center border border-campus-green/30">
+                    {user.name.charAt(0) || "U"}
+                  </div>
+                  <span className="truncate max-w-[100px]">{user.name.split(" ")[0]}</span>
+                </Link>
+                <button
+                  type="button"
+                  onClick={() => signOut()}
+                  aria-label="Sign out"
+                  title="Sign out of campus portal"
+                  className="p-1.5 text-ink-muted hover:text-brick hover:bg-paper rounded-[6px] transition-colors"
+                >
+                  <LogOut className="w-3.5 h-3.5" strokeWidth={1.5} />
+                </button>
               </div>
-              <span>Sign in</span>
-            </Link>
+            ) : (
+              <Link
+                to="/sign-in"
+                className={cn(
+                  "hidden sm:flex items-center gap-2 px-2.5 py-1.5 text-[13px] font-medium text-ink-muted hover:text-ink hover:bg-paper rounded-[6px] transition-colors border border-transparent hover:border-line",
+                  "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-campus-green",
+                  location.pathname === "/sign-in" && "text-campus-green font-semibold"
+                )}
+              >
+                <div className="w-6 h-6 rounded-full bg-paper border border-line flex items-center justify-center text-ink">
+                  <User className="w-3.5 h-3.5" strokeWidth={1.5} />
+                </div>
+                <span>Sign in</span>
+              </Link>
+            )}
 
             {/* Mobile Menu Morphing Hamburger Button */}
             <button

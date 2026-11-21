@@ -1479,7 +1479,7 @@ export const Report: React.FC = () => {
                     {maxStepReached >= 5 && step < 5 && (
                       <Button
                         type="button"
-                        variant="tertiary"
+                        variant="quiet"
                         size="md"
                         onClick={() => jumpToStep(5)}
                       >
