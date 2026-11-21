@@ -22,7 +22,7 @@ import { StatusChip } from "@/motion/StatusChip";
 import { Dialog } from "@/motion/Dialog";
 import { AnimatedNumber } from "@/motion/AnimatedNumber";
 import { useToast } from "@/motion/Toast";
-import { springs } from "@/motion/tokens";
+import { springs, durations } from "@/motion/tokens";
 import { placeholderItems } from "@/data/items";
 import { api } from "@/data/api";
 import { getCategoryIcon } from "@/components/ui/ItemCard";
@@ -285,7 +285,7 @@ export const Admin: React.FC = () => {
       showToast({
         title: "Approval failed",
         description: `Could not approve claim ${target.refCode}. Changes have been reverted.`,
-        duration: 4000,
+        duration: durations.toastStandard,
       });
     });
 
@@ -360,7 +360,7 @@ export const Admin: React.FC = () => {
       showToast({
         title: "Bulk approval failed",
         description: "Could not approve selected claims. Changes have been reverted.",
-        duration: 4000,
+        duration: durations.toastStandard,
       });
     });
 

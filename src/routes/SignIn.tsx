@@ -6,6 +6,7 @@ import { collegeConfig } from "@/config/college";
 import { auth, useAuth, getCollegeDomain } from "@/auth";
 import { Button } from "@/components/ui/Button";
 import { useToast } from "@/motion/Toast";
+import { durations } from "@/motion/tokens";
 import { cn } from "@/lib/utils";
 
 export const SignIn: React.FC = () => {
@@ -156,7 +157,7 @@ export const SignIn: React.FC = () => {
                       initial={{ opacity: 0, height: 0 }}
                       animate={{ opacity: 1, height: "auto" }}
                       exit={{ opacity: 0, height: 0 }}
-                      transition={{ duration: 0.18 }}
+                      transition={{ duration: durations.uiExit }}
                       className="flex items-center gap-1.5 text-[12px] text-brick pt-1"
                     >
                       <AlertCircle className="w-3.5 h-3.5 shrink-0" />
@@ -194,7 +195,7 @@ export const SignIn: React.FC = () => {
                       initial={{ opacity: 0, height: 0 }}
                       animate={{ opacity: 1, height: "auto" }}
                       exit={{ opacity: 0, height: 0 }}
-                      transition={{ duration: 0.18 }}
+                      transition={{ duration: durations.uiExit }}
                       className="flex items-center gap-1.5 text-[12px] text-brick pt-1"
                     >
                       <AlertCircle className="w-3.5 h-3.5 shrink-0" />

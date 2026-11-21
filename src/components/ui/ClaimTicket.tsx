@@ -1,7 +1,7 @@
 import React from "react";
 import { motion } from "motion/react";
 import { Calendar, MapPin, Ticket } from "lucide-react";
-import { springs, easings } from "@/motion/tokens";
+import { springs, easings, durations } from "@/motion/tokens";
 import { StatusChip } from "@/motion/StatusChip";
 import { cn } from "@/lib/utils";
 
@@ -56,8 +56,8 @@ export const ClaimTicket: React.FC<ClaimTicketProps> = ({
         initial={animateEntrance ? { y: -24, opacity: 0 } : false}
         animate={{ y: 0, opacity: 1 }}
         transition={{
-          y: { ...springs.soft, duration: 0.7 },
-          opacity: { duration: 0.3, ease: easings.out },
+          y: springs.soft,
+          opacity: { duration: durations.ui, ease: easings.out },
         }}
         className={cn(
           "relative bg-surface border border-line rounded-[10px] shadow-subtle overflow-hidden flex flex-col sm:flex-row items-stretch",
@@ -82,7 +82,7 @@ export const ClaimTicket: React.FC<ClaimTicketProps> = ({
               data-testid="ticket-ref-code"
               initial={animateEntrance ? { opacity: 0.35 } : false}
               animate={{ opacity: 1 }}
-              transition={{ delay: 0.7, duration: 0.3, ease: easings.out }}
+              transition={{ delay: durations.page, duration: durations.ui, ease: easings.out }}
               className="font-mono text-[17px] sm:text-[19px] font-bold text-[#1A2220] tracking-tight bg-surface/90 px-2.5 py-1 rounded-[4px] border border-[#1A2220]/20 inline-block shadow-subtle"
             >
               {refCode}

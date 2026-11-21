@@ -16,7 +16,7 @@ import { Button } from "@/components/ui/Button";
 import { StatusChip } from "@/motion/StatusChip";
 import { Dialog } from "@/motion/Dialog";
 import { useToast } from "@/motion/Toast";
-import { springs, easings } from "@/motion/tokens";
+import { springs, easings, durations } from "@/motion/tokens";
 import { getCategoryIcon } from "@/components/ui/ItemCard";
 import { useAuth } from "@/auth";
 import { api } from "@/data/api";
@@ -258,7 +258,7 @@ export const MyReports: React.FC = () => {
       showToast({
         title: "Withdrawal failed",
         description: `Could not withdraw reference ${item.refCode}. Changes have been reverted.`,
-        duration: 4000,
+        duration: durations.toastStandard,
       });
     });
 
@@ -277,7 +277,7 @@ export const MyReports: React.FC = () => {
           });
         },
       },
-      duration: 6000,
+      duration: durations.toastUndo,
     });
   };
 
@@ -374,16 +374,16 @@ export const MyReports: React.FC = () => {
               x: 0,
               opacity: 1,
               transition: {
-                x: { duration: 0.25, ease: easings.out },
-                opacity: { duration: 0.2, ease: easings.out },
+                x: { duration: durations.step, ease: easings.out },
+                opacity: { duration: durations.uiExit, ease: easings.out },
               },
             },
             exit: (d: number) => ({
               x: d * -8,
               opacity: 0,
               transition: {
-                x: { duration: 0.18, ease: easings.out },
-                opacity: { duration: 0.15, ease: easings.out },
+                x: { duration: durations.uiExit, ease: easings.out },
+                opacity: { duration: durations.micro, ease: easings.out },
               },
             }),
           }}
@@ -541,7 +541,7 @@ export const MyReports: React.FC = () => {
                                   initial={{ scaleX: 0 }}
                                   animate={{ scaleX: currentStage / 4 }}
                                   style={{ transformOrigin: "left" }}
-                                  transition={{ duration: 0.5, ease: easings.out }}
+                                  transition={{ duration: durations.page, ease: easings.out }}
                                   className="absolute top-5 left-4 right-4 h-0.5 bg-campus-green pointer-events-none"
                                 />
 
@@ -563,7 +563,7 @@ export const MyReports: React.FC = () => {
                                             <span className="relative flex h-4 w-4">
                                               <motion.span
                                                 animate={{ scale: [1, 1.45, 1], opacity: [1, 0.65, 1] }}
-                                                transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+                                                transition={{ duration: durations.pulse, repeat: Infinity, ease: "easeInOut" }}
                                                 className="absolute inline-flex h-full w-full rounded-full bg-campus-green"
                                               />
                                               <span className="relative inline-flex rounded-full h-4 w-4 bg-campus-green items-center justify-center text-surface text-[9px] font-bold">

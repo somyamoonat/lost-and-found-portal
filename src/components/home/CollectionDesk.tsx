@@ -2,6 +2,7 @@ import React from "react";
 import { motion } from "motion/react";
 import { MapPin, Clock, Phone, IdCard } from "lucide-react";
 import { collegeConfig } from "@/config/college";
+import { durations } from "@/motion/tokens";
 
 export function getDeskStatus(date: Date = new Date()): {
   isOpen: boolean;
@@ -65,7 +66,7 @@ export const CollectionDesk: React.FC = () => {
                   transition={
                     isOpen
                       ? {
-                          duration: 2.2,
+                          duration: durations.pulse,
                           repeat: Infinity,
                           ease: "easeInOut",
                         }

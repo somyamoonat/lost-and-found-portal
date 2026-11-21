@@ -25,7 +25,7 @@ import { collegeConfig } from "@/config/college";
 import { api, type ReportSubmission } from "@/data/api";
 import { ClaimTicket } from "@/components/ui/ClaimTicket";
 import { Button } from "@/components/ui/Button";
-import { springs, easings } from "@/motion/tokens";
+import { springs, easings, durations } from "@/motion/tokens";
 import { cn } from "@/lib/utils";
 
 // Category icon helper
@@ -424,16 +424,16 @@ export const Report: React.FC = () => {
       x: 0,
       opacity: 1,
       transition: {
-        x: { duration: 0.35, ease: easings.out },
-        opacity: { duration: 0.25, ease: easings.out },
+        x: { duration: durations.step, ease: easings.out },
+        opacity: { duration: durations.ui, ease: easings.out },
       },
     },
     exit: (dir: number) => ({
       x: dir > 0 ? -24 : 24,
       opacity: 0,
       transition: {
-        x: { duration: 0.18, ease: easings.out },
-        opacity: { duration: 0.15, ease: easings.out },
+        x: { duration: durations.uiExit, ease: easings.out },
+        opacity: { duration: durations.micro, ease: easings.out },
       },
     }),
   };
@@ -456,7 +456,7 @@ export const Report: React.FC = () => {
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
-            transition={{ duration: 0.45, ease: easings.out }}
+            transition={{ duration: durations.page, ease: easings.out }}
             className="space-y-8 text-center pt-2"
           >
             {/* Header copy */}
@@ -559,7 +559,7 @@ export const Report: React.FC = () => {
                         initial={{ opacity: 0, y: -4 }}
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0 }}
-                        transition={{ duration: 0.2 }}
+                        transition={{ duration: durations.uiExit }}
                         className="flex items-center gap-1 text-[12px] text-campus-green"
                       >
                         <Check className="w-3.5 h-3.5" strokeWidth={2} />
@@ -577,7 +577,7 @@ export const Report: React.FC = () => {
                   style={{ transformOrigin: "left" }}
                   initial={false}
                   animate={{ scaleX: (step + 1) / STEP_TITLES.length }}
-                  transition={{ duration: 0.35, ease: easings.out }}
+                  transition={{ duration: durations.step, ease: easings.out }}
                   data-testid="stepper-progress-fill"
                 />
               </div>
@@ -627,7 +627,7 @@ export const Report: React.FC = () => {
                               d="M20 6L9 17l-5-5"
                               initial={{ pathLength: 0 }}
                               animate={{ pathLength: 1 }}
-                              transition={{ duration: 0.35, ease: easings.out }}
+                              transition={{ duration: durations.step, ease: easings.out }}
                             />
                           </svg>
                         ) : (

@@ -1,5 +1,6 @@
 import React from "react";
 import { motion, type HTMLMotionProps } from "motion/react";
+import { durations } from "./tokens";
 import { cn } from "@/lib/utils";
 
 interface SkeletonProps extends HTMLMotionProps<"div"> {
@@ -31,7 +32,7 @@ export const Skeleton: React.FC<SkeletonProps> = ({
       aria-hidden="true"
       animate={{ opacity: [0.45, 0.85, 0.45] }}
       transition={{
-        duration: 1.6,
+        duration: durations.skeleton,
         repeat: Infinity,
         ease: "easeInOut",
       }}

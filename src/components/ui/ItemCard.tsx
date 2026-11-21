@@ -87,10 +87,7 @@ export const ItemCard: React.FC<ItemCardProps> = ({
             <div className="relative w-24 sm:w-28 aspect-[4/3] rounded-[6px] overflow-hidden bg-paper border border-line/60 shrink-0">
               <motion.div
                 layoutId={`item-image-${item.id}`}
-                className="w-full h-full flex items-center justify-center bg-[#ECEFEA] transition-transform duration-500 group-hover:scale-[1.04]"
-                style={{
-                  transitionTimingFunction: "cubic-bezier(0.22, 1, 0.36, 1)",
-                }}
+                className="w-full h-full flex items-center justify-center bg-[#ECEFEA]"
               >
                 {item.photo ? (
                   <img
@@ -157,10 +154,7 @@ export const ItemCard: React.FC<ItemCardProps> = ({
         <div className="relative w-full aspect-[4/3] rounded-[8px] overflow-hidden bg-paper border border-line/60 mb-3">
           <motion.div
             layoutId={`item-image-${item.id}`}
-            className="w-full h-full flex items-center justify-center bg-[#ECEFEA] transition-transform duration-500 group-hover:scale-[1.04]"
-            style={{
-              transitionTimingFunction: "cubic-bezier(0.22, 1, 0.36, 1)",
-            }}
+            className="w-full h-full flex items-center justify-center bg-[#ECEFEA]"
           >
             {item.photo ? (
               <img

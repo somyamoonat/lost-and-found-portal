@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { motion } from "motion/react";
 import { ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/Button";
+import { springs } from "@/motion/tokens";
 
 /**
  * 404 Not Found Page:
@@ -28,8 +29,7 @@ export const NotFound: React.FC = () => {
               animate={{ rotate: 0 }}
               transition={{
                 type: "spring",
-                stiffness: 110,
-                damping: 9,
+                ...springs.tagSwing,
                 mass: 1.1,
               }}
               className="relative w-28 bg-[#FAF6EE] border border-[#E3A92F]/60 rounded-[8px] p-3 text-center shadow-subtle select-none"

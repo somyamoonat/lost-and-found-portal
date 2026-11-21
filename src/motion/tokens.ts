@@ -11,6 +11,7 @@
  * - Animate transform and opacity only.
  * - Never animate width/height/top/left directly.
  * - Exits run at roughly 60% of entrance duration.
+ * - All durations, springs, and easings must come from this token registry.
  */
 
 export const easings = {
@@ -31,16 +32,34 @@ export const springs = {
     stiffness: 300,
     damping: 32,
   },
+  tagSwing: {
+    stiffness: 110,
+    damping: 9,
+  },
 } as const;
 
 export const durations = {
   micro: 0.15,
   ui: 0.3,
   page: 0.45,
+  step: 0.35,
   // Exits run at about 60% of entrance duration
   microExit: 0.09,
   uiExit: 0.18,
   pageExit: 0.27,
+  // Continuous & specialized timings
+  skeleton: 1.6,
+  pulse: 2.0,
+  tagHighlight: 1.2,
+  progress: 1.4,
+  toastStandard: 4000,
+  toastUndo: 6000,
+} as const;
+
+export const delays = {
+  headlineStagger: 0.08,
+  itemStagger: 0.04,
+  minStagger: 0.02,
 } as const;
 
 export const transitions = {
@@ -68,7 +87,16 @@ export const transitions = {
     duration: durations.pageExit,
     ease: easings.out,
   },
+  stepOut: {
+    duration: durations.step,
+    ease: easings.out,
+  },
+  stepExit: {
+    duration: durations.uiExit,
+    ease: easings.out,
+  },
   softSpring: springs.soft,
   snappySpring: springs.snappy,
   sheetSpring: springs.sheet,
+  tagSpring: springs.tagSwing,
 } as const;

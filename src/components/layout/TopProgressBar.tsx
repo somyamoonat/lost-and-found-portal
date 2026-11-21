@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useNavigation } from "react-router-dom";
 import { motion, AnimatePresence } from "motion/react";
-import { easings } from "@/motion/tokens";
+import { easings, durations } from "@/motion/tokens";
 
 interface TopProgressBarProps {
   isManualLoading?: boolean;
@@ -43,12 +43,12 @@ export const TopProgressBar: React.FC<TopProgressBarProps> = ({ isManualLoading 
             transition={
               isLoading
                 ? {
-                    duration: 1.4,
+                    duration: durations.progress,
                     repeat: Infinity,
                     ease: easings.out,
                   }
                 : {
-                    duration: 0.25,
+                    duration: durations.uiExit,
                     ease: easings.out,
                   }
             }

@@ -259,7 +259,7 @@ export const ItemDetail: React.FC = () => {
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   exit={{ opacity: 0 }}
-                  transition={{ duration: 0.2, ease: easings.out }}
+                  transition={{ duration: durations.uiExit, ease: easings.out }}
                   className="w-full h-full flex flex-col items-center justify-center p-6 text-center select-none"
                 >
                   {item.photo ? (
@@ -590,7 +590,7 @@ export const ItemDetail: React.FC = () => {
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: "-50px" }}
-          transition={{ duration: 0.5, ease: easings.out }}
+          transition={{ duration: durations.page, ease: easings.out }}
           className="pt-8 border-t border-line space-y-6"
         >
           <div className="flex items-center justify-between">
@@ -696,7 +696,7 @@ export const ItemDetail: React.FC = () => {
                       initial={{ opacity: 0, y: 16 }}
                       animate={{ opacity: 1, y: 0 }}
                       exit={{ opacity: 0 }}
-                      transition={{ duration: 0.35, ease: easings.out }}
+                      transition={{ duration: durations.step, ease: easings.out }}
                       className="space-y-6 text-center py-4"
                     >
                       {/* Self-Drawing Check Mark (pathLength 0->1, 0.5s) */}
@@ -711,7 +711,7 @@ export const ItemDetail: React.FC = () => {
                             strokeWidth="2.5"
                             initial={{ pathLength: 0 }}
                             animate={{ pathLength: 1 }}
-                            transition={{ duration: 0.5, ease: easings.out }}
+                            transition={{ duration: durations.page, ease: easings.out }}
                           />
                           <motion.path
                             fill="none"
@@ -722,7 +722,7 @@ export const ItemDetail: React.FC = () => {
                             d="M15 27l8 8 15-16"
                             initial={{ pathLength: 0 }}
                             animate={{ pathLength: 1 }}
-                            transition={{ duration: 0.5, delay: 0.25, ease: easings.out }}
+                            transition={{ duration: durations.page, delay: durations.pageExit, ease: easings.out }}
                           />
                         </svg>
                       </div>

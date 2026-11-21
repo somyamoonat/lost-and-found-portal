@@ -5,7 +5,7 @@ import { Bell, CheckCheck, Clock } from "lucide-react";
 import { useNotifications } from "@/notifications";
 import { AnimatedNumber } from "@/motion/AnimatedNumber";
 import { fadeScaleVariants } from "@/motion/variants";
-import { springs } from "@/motion/tokens";
+import { springs, durations, easings } from "@/motion/tokens";
 import { cn } from "@/lib/utils";
 
 export const NotificationPopover: React.FC = () => {
@@ -105,7 +105,7 @@ export const NotificationPopover: React.FC = () => {
                             initial={{ scale: 0 }}
                             animate={{ scale: 1 }}
                             exit={{ scale: 0, opacity: 0 }}
-                            transition={{ duration: 0.2, ease: "easeOut" }}
+                            transition={{ duration: durations.uiExit, ease: easings.out }}
                             className="w-2 h-2 rounded-full bg-campus-green shrink-0"
                           />
                         )}

@@ -15,7 +15,7 @@ import { HowItWorks } from "@/components/home/HowItWorks";
 import { CollectionDesk } from "@/components/home/CollectionDesk";
 import { Skeleton } from "@/motion/Skeleton";
 import { Reveal } from "@/motion/Reveal";
-import { easings } from "@/motion/tokens";
+import { easings, durations, delays } from "@/motion/tokens";
 
 const quickPicks = [
   { label: "ID card", query: "ID card" },
@@ -40,6 +40,7 @@ export const Home: React.FC = () => {
   // Recently found items state
   const [recentItems, setRecentItems] = useState<Item[]>([]);
   const [loadingRecent, setLoadingRecent] = useState(true);
+  const [hasError, setHasError] = useState(false);
 
   // Initial data loading
   useEffect(() => {
@@ -58,6 +59,10 @@ export const Home: React.FC = () => {
         }
       } catch (err) {
         console.error("Failed to load home page data:", err);
+        if (isMounted) {
+          setLoadingRecent(false);
+          setHasError(true);
+        }
       }
     }
 
@@ -144,7 +149,7 @@ export const Home: React.FC = () => {
                     initial={{ y: "100%" }}
                     animate={{ y: 0 }}
                     transition={{
-                      duration: 0.45,
+                      duration: durations.page,
                       ease: easings.out,
                       delay: 0.0,
                     }}
@@ -160,9 +165,9 @@ export const Home: React.FC = () => {
                     initial={{ y: "100%" }}
                     animate={{ y: 0 }}
                     transition={{
-                      duration: 0.45,
+                      duration: durations.page,
                       ease: easings.out,
-                      delay: 0.08,
+                      delay: delays.headlineStagger,
                     }}
                     className="type-display text-ink"
                   >
@@ -177,7 +182,7 @@ export const Home: React.FC = () => {
                 initial={{ opacity: 0, y: 12 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{
-                  duration: 0.35,
+                  duration: durations.step,
                   ease: easings.out,
                   delay: 0.22,
                 }}
@@ -256,7 +261,7 @@ export const Home: React.FC = () => {
                       animate: {
                         opacity: 1,
                         y: 0,
-                        transition: { duration: 0.25, ease: easings.out },
+                        transition: { duration: durations.uiExit, ease: easings.out },
                       },
                     }}
                     onClick={() => handleQuickPick(chip.query)}
@@ -308,10 +313,10 @@ export const Home: React.FC = () => {
                           }}
                           exit={{ opacity: 0, scale: 0.96 }}
                           transition={{
-                            duration: 0.35,
+                            duration: durations.step,
                             ease: easings.out,
                             delay: idx < 4 && !newlyAddedId ? 0.48 + idx * 0.07 : 0,
-                            outlineColor: { duration: 1.2, ease: "easeOut" },
+                            outlineColor: { duration: durations.tagHighlight, ease: easings.out },
                           }}
                           style={{
                             outline: isNew ? "2px solid #E3A92F" : "2px solid transparent",
@@ -323,7 +328,7 @@ export const Home: React.FC = () => {
                             className="flex items-center gap-3 min-w-0 flex-1 outline-none group"
                           >
                             {/* Small Category Colour Block with Lucide Icon */}
-                            <div className="w-10 h-10 rounded-[6px] bg-[#ECEFEA] border border-line/80 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
+                            <div className="w-10 h-10 rounded-[6px] bg-[#ECEFEA] border border-line/80 flex items-center justify-center shrink-0">
                               {getCategoryIcon(item.category)}
                             </div>
 
@@ -407,6 +412,19 @@ export const Home: React.FC = () => {
                   </div>
                 </div>
               ))}
+            </div>
+          ) : hasError ? (
+            <div className="bg-surface border border-line rounded-[12px] p-8 text-center space-y-3">
+              <p className="text-[14px] text-ink-muted">
+                Unable to load recent intake property records.
+              </p>
+              <button
+                type="button"
+                onClick={() => window.location.reload()}
+                className="text-[13px] text-campus-green font-medium hover:underline cursor-pointer"
+              >
+                Reload page
+              </button>
             </div>
           ) : (
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">

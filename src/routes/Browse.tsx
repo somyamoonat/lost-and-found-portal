@@ -18,7 +18,7 @@ import { ItemCard } from "@/components/ui/ItemCard";
 import { Button } from "@/components/ui/Button";
 import { AnimatedNumber } from "@/motion/AnimatedNumber";
 import { Skeleton } from "@/motion/Skeleton";
-import { springs } from "@/motion/tokens";
+import { springs, durations } from "@/motion/tokens";
 import { slideSheetBottomVariants, backdropFadeVariants } from "@/motion/variants";
 import { cn } from "@/lib/utils";
 
@@ -59,6 +59,7 @@ export const Browse: React.FC = () => {
   const [items, setItems] = useState<Item[]>([]);
   const [totalCount, setTotalCount] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
+  const [isError, setIsError] = useState(false);
 
   // Realtime pending new items pill state
   const [pendingNewItems, setPendingNewItems] = useState<Item[]>([]);
@@ -125,6 +126,7 @@ export const Browse: React.FC = () => {
   useEffect(() => {
     let active = true;
     setIsLoading(true);
+    setIsError(false);
 
     async function fetchData() {
       try {
@@ -147,6 +149,7 @@ export const Browse: React.FC = () => {
         if (active) {
           console.error("Failed to fetch browse catalog:", err);
           setIsLoading(false);
+          setIsError(true);
         }
       }
     }
@@ -664,6 +667,30 @@ export const Browse: React.FC = () => {
               </div>
             ))}
           </div>
+        ) : isError ? (
+          <motion.div
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            data-testid="browse-error-state"
+            className="bg-surface border border-line rounded-[12px] p-8 sm:p-12 text-center max-w-lg mx-auto space-y-4 shadow-subtle my-8"
+          >
+            <div className="w-12 h-12 rounded-full bg-paper border border-line flex items-center justify-center mx-auto text-brick">
+              <RotateCcw className="w-6 h-6" strokeWidth={1.5} />
+            </div>
+            <div className="space-y-1.5">
+              <h3 className="text-[18px] font-semibold text-ink">
+                Unable to load intake records
+              </h3>
+              <p className="text-[14px] text-ink-muted leading-relaxed">
+                The intake registry database could not be reached. Please check your connection or retry.
+              </p>
+            </div>
+            <div className="pt-2">
+              <Button variant="secondary" onClick={() => updateParams({})}>
+                Retry connection
+              </Button>
+            </div>
+          </motion.div>
         ) : items.length === 0 ? (
           /* Empty State */
           <motion.div
@@ -726,7 +753,7 @@ export const Browse: React.FC = () => {
                     exit={{
                       opacity: 0,
                       scale: 0.96,
-                      transition: { duration: 0.15 },
+                      transition: { duration: durations.micro },
                     }}
                     transition={{
                       ...springs.soft,
