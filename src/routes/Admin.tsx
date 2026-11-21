@@ -24,6 +24,7 @@ import { AnimatedNumber } from "@/motion/AnimatedNumber";
 import { useToast } from "@/motion/Toast";
 import { springs } from "@/motion/tokens";
 import { placeholderItems } from "@/data/items";
+import { api } from "@/data/api";
 import { getCategoryIcon } from "@/components/ui/ItemCard";
 import { cn } from "@/lib/utils";
 
@@ -267,11 +268,26 @@ export const Admin: React.FC = () => {
     });
   };
 
-  // Actions
+  // Actions (with optimistic update and toast rollback)
   const handleConfirmApprove = (target: AdminClaim) => {
+    const previousClaims = [...claims];
+
+    // Optimistically update status to ready_to_collect
     setClaims((prev) =>
       prev.map((c) => (c.id === target.id ? { ...c, status: "ready_to_collect" as const } : c))
     );
+
+    // Call API with rollback on failure
+    api.approveClaim(target.id).catch((err) => {
+      console.error("Failed to approve claim:", err);
+      // Rollback to previous state
+      setClaims(previousClaims);
+      showToast({
+        title: "Approval failed",
+        description: `Could not approve claim ${target.refCode}. Changes have been reverted.`,
+        duration: 4000,
+      });
+    });
 
     // Row collapses out of the review queue after 0.25s
     setTimeout(() => {
@@ -330,8 +346,23 @@ export const Admin: React.FC = () => {
 
   const handleBulkApprove = () => {
     const count = selectedIds.size;
+    const previousClaims = [...claims];
+    const approvedTargetIds = Array.from(selectedIds);
+
+    // Optimistically remove from review queue
     setClaims((prev) => prev.filter((c) => !selectedIds.has(c.id)));
     setSelectedIds(new Set());
+
+    // Call API with rollback on failure
+    Promise.all(approvedTargetIds.map((id) => api.approveClaim(id))).catch((err) => {
+      console.error("Bulk approval error:", err);
+      setClaims(previousClaims);
+      showToast({
+        title: "Bulk approval failed",
+        description: "Could not approve selected claims. Changes have been reverted.",
+        duration: 4000,
+      });
+    });
 
     showToast({
       title: `${count} claims approved`,

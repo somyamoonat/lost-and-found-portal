@@ -3,6 +3,7 @@ import {
   createBrowserRouter,
   RouterProvider,
 } from "react-router-dom";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { AppLayout } from "./components/layout/AppLayout";
 import { Home } from "./routes/Home";
 import { Browse } from "./routes/Browse";
@@ -15,6 +16,15 @@ import { NotFound } from "./routes/NotFound";
 import { StyleguideRoute } from "./routes/Styleguide";
 import { MotionProvider } from "./motion/MotionProvider";
 import { ToastProvider } from "./motion/Toast";
+
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 1000 * 60, // 1 minute
+      refetchOnWindowFocus: false,
+    },
+  },
+});
 
 // Data router hierarchy with AppLayout shell
 const router = createBrowserRouter([
@@ -64,11 +74,13 @@ const router = createBrowserRouter([
 
 export const App: React.FC = () => {
   return (
-    <MotionProvider>
-      <ToastProvider>
-        <RouterProvider router={router} />
-      </ToastProvider>
-    </MotionProvider>
+    <QueryClientProvider client={queryClient}>
+      <MotionProvider>
+        <ToastProvider>
+          <RouterProvider router={router} />
+        </ToastProvider>
+      </MotionProvider>
+    </QueryClientProvider>
   );
 };
 

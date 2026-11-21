@@ -5,6 +5,8 @@ A production-quality campus lost and found repository designed for institutional
 ## Stack
 
 - **Framework**: Vite + React 19 + TypeScript
+- **Database & Auth**: Supabase (PostgreSQL with RLS, Storage, Realtime subscriptions)
+- **Data Fetching**: TanStack Query (`@tanstack/react-query`) with optimistic updates and rollback
 - **Routing**: React Router (data router with `createBrowserRouter` & `RouterProvider`)
 - **Styling**: Tailwind CSS v4 with CSS-first `@theme` design tokens
 - **Motion**: Motion (`motion/react`) with spring physics, shared layout transitions, and strict accessibility compliance (`MotionConfig reducedMotion="user"`)
@@ -29,22 +31,51 @@ A production-quality campus lost and found repository designed for institutional
   - Zero emojis or sparkle icons; zero tracked ALL-CAPS eyebrow labels
   - Sentence case everywhere; plain, active, institutional copy
 
-## Motion System (`src/motion/`)
+## Backend & Database Setup (Supabase)
 
-- `tokens.ts`:
-  - Easings: `out [0.22, 1, 0.36, 1]`, `inOut [0.65, 0, 0.35, 1]`
-  - Springs: `soft` (`{ stiffness: 260, damping: 30 }`), `snappy` (`{ stiffness: 420, damping: 34 }`), `sheet` (`{ stiffness: 300, damping: 32 }`)
-  - Durations: `micro 0.15s`, `ui 0.3s`, `page 0.45s` (exits run at ~60% of entrance duration)
-- `variants.ts`: `maskedLine`, `riseIn`, `staggerContainer`, `fadeScale`, `slideSheetRightVariants`, `slideSheetBottomVariants`
-- **Primitives**:
-  - `<PageTransition>`: Smooth opacity and subtle y entry/exit with `mode="popLayout"`
-  - `<Reveal>`: Scroll reveals with `useInView`, `once: true`, and `margin: "-80px"`
-  - `<AnimatedNumber>`: Spring-driven numerical counter with `useSpring` and `useTransform`
-  - `<Pressable>`: Tactile `whileTap={{ scale: 0.98 }}` spring interaction
-  - `<Skeleton>`: Pure flat opacity pulse between 0.45 and 0.85 (no shimmer gradients)
-  - `<StatusChip>`: Full-radius status badge whose background, text, and border smoothly morph across lifecycle states
-  - `<Toast>`: Context-driven stacked notifications with horizontal swipe-to-dismiss and undo actions
-  - `<Dialog>` & `<Sheet>`: Accessible Radix dialogs integrated with `AnimatePresence` and flat neutral overlays
+The portal can run completely against a live Supabase project or seamlessly against the built-in mock backend.
+
+### 1. Environment Variables
+
+Copy `.env.example` to `.env`:
+
+```bash
+cp .env.example .env
+```
+
+Set your Supabase credentials:
+```env
+VITE_SUPABASE_URL=https://your-project.supabase.co
+VITE_SUPABASE_ANON_KEY=your-anon-key-here
+VITE_USE_MOCK=false
+```
+
+When `VITE_USE_MOCK=true` or when credentials are left as placeholders, the portal automatically falls back to the in-memory mock API without errors.
+
+### 2. Database Schema & RLS Migrations
+
+Apply the migration in [supabase/migrations/20261121000000_initial_schema.sql](supabase/migrations/20261121000000_initial_schema.sql) through the Supabase Dashboard SQL Editor or Supabase CLI:
+
+- **Profiles**: `profiles(id, name, role 'student'|'admin', email)` linked to `auth.users`. Includes trigger enforcing `@stjude.edu` university domain.
+- **Items**: `items(id, ref_code, type 'lost'|'found', title, description, category, location, occurred_at, status, photo_path, private_detail, reporter_id, held_at, created_at)`.
+  - Sequential reference code generator `generate_ref_code()` formatted as `LF-0001`.
+- **Claims**: `claims(id, item_id, claimant_id, description, identifying_detail, proof_path, status, reviewed_by, reject_reason, created_at)`.
+- **Notifications**: `notifications(id, user_id, text, read, created_at)`.
+- **Security & Privacy**:
+  - Row Level Security (RLS) enabled across all tables.
+  - Public read access queries the `public_items` view, guaranteeing `private_detail` is never exposed to unauthorized users.
+  - Claimants can insert and read only their own claims.
+  - Staff administrators have full verification privileges.
+- **Storage**: `item-photos` bucket for evidence and intake photography, capped at 5MB with client-side image compression.
+
+To populate realistic sample campus items, execute [supabase/seed.sql](supabase/seed.sql).
+
+### 3. Realtime & TanStack Query
+
+- **Realtime Channel**: Subscribes to `public:items` table insertions.
+  - On **Home** (`/`), new found items glide into the top of "Handed in today" with a 1.2s amber outline.
+  - On **Browse** (`/browse`), new items matching the active filters slide down a `"1 new item. Show"` pill below the toolbar without disturbing the user's active viewport or grid.
+- **TanStack Query**: Wraps the unified API gateway with query caching, refetch management, and optimistic mutations with automatic Toast rollback on error.
 
 ## Routes
 
@@ -57,10 +88,6 @@ A production-quality campus lost and found repository designed for institutional
 - `/sign-in` — University single sign-on (SSO) authentication
 - `*` — 404 page featuring the swinging `LF-404` luggage-tag motif on a damped rotation spring
 - `/styleguide` — Interactive design and motion system specification laboratory
-
-## Institutional Configuration
-
-All campus-specific text, intake buildings, categories, desk operating hours, and statutory 90-day retention policies are defined in [src/config/college.ts](src/config/college.ts) so the portal can be easily retargeted.
 
 ## Development
 

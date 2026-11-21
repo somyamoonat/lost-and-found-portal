@@ -19,6 +19,7 @@ import { useToast } from "@/motion/Toast";
 import { springs, easings } from "@/motion/tokens";
 import { getCategoryIcon } from "@/components/ui/ItemCard";
 import { useAuth } from "@/auth";
+import { api } from "@/data/api";
 import { cn } from "@/lib/utils";
 
 export interface TimelineStage {
@@ -235,15 +236,31 @@ export const MyReports: React.FC = () => {
   const prevIndex = TAB_CONFIG.find((t) => t.key === previousTab)?.index ?? 0;
   const tabDirection = activeIndex >= prevIndex ? 1 : -1;
 
-  // Withdraw Confirmation and Undo logic
+  // Withdraw Confirmation and Undo logic (Optimistic update with toast rollback)
   const handleConfirmWithdraw = (item: UserReportItem) => {
     const currentList = getActiveList();
     const itemIndex = currentList.findIndex((i) => i.id === item.id);
     if (itemIndex === -1) return;
 
-    // Remove from active list
+    // Optimistically remove from active list
     setActiveList((prev) => prev.filter((i) => i.id !== item.id));
     setConfirmWithdrawTarget(null);
+
+    // Call API with rollback on failure
+    api.withdrawReport(item.id).catch((err) => {
+      console.error("Failed to withdraw report:", err);
+      // Rollback to previous state
+      setActiveList((prev) => {
+        const copy = [...prev];
+        copy.splice(itemIndex, 0, item);
+        return copy;
+      });
+      showToast({
+        title: "Withdrawal failed",
+        description: `Could not withdraw reference ${item.refCode}. Changes have been reverted.`,
+        duration: 4000,
+      });
+    });
 
     // Show toast with Undo for 6 seconds
     showToast({

@@ -13,6 +13,7 @@ import {
 import { collegeConfig } from "@/config/college";
 import { api } from "@/data/api";
 import type { Item } from "@/data/items";
+import { subscribeToNewItems } from "@/data/realtime";
 import { ItemCard } from "@/components/ui/ItemCard";
 import { Button } from "@/components/ui/Button";
 import { AnimatedNumber } from "@/motion/AnimatedNumber";
@@ -58,6 +59,9 @@ export const Browse: React.FC = () => {
   const [items, setItems] = useState<Item[]>([]);
   const [totalCount, setTotalCount] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
+
+  // Realtime pending new items pill state
+  const [pendingNewItems, setPendingNewItems] = useState<Item[]>([]);
 
   // Mobile bottom filter sheet state
   const [mobileFilterOpen, setMobileFilterOpen] = useState(false);
@@ -153,6 +157,60 @@ export const Browse: React.FC = () => {
       active = false;
     };
   }, [searchQuery, statusFilter, buildingFilter, dateFilter, sortFilter, rawCategories, displayLimit]);
+
+  // Realtime subscription: if a new item matches active filters, show sliding pill without shifting grid
+  useEffect(() => {
+    const unsubscribe = subscribeToNewItems((newItem: Item) => {
+      // 1. Check status/type
+      if (statusFilter !== "all" && newItem.type !== statusFilter) return;
+
+      // 2. Check categories
+      if (selectedCategories.length > 0 && !selectedCategories.includes(newItem.category)) return;
+
+      // 3. Check building
+      if (buildingFilter !== "all") {
+        const bldg = buildingFilter.toLowerCase();
+        const matchesBldg =
+          newItem.buildingCode?.toLowerCase() === bldg ||
+          newItem.location.toLowerCase().includes(bldg);
+        if (!matchesBldg) return;
+      }
+
+      // 4. Check search query
+      if (searchQuery.trim()) {
+        const q = searchQuery.toLowerCase().trim();
+        const matchesQuery =
+          newItem.title.toLowerCase().includes(q) ||
+          newItem.refCode.toLowerCase().includes(q) ||
+          newItem.description.toLowerCase().includes(q) ||
+          newItem.location.toLowerCase().includes(q);
+        if (!matchesQuery) return;
+      }
+
+      // If matches active filters: show "1 new item. Show" pill sliding down, DO NOT shift grid yet
+      setPendingNewItems((prev) => {
+        if (prev.some((i) => i.id === newItem.id || i.refCode === newItem.refCode)) return prev;
+        return [newItem, ...prev];
+      });
+    });
+
+    return () => {
+      unsubscribe();
+    };
+  }, [statusFilter, selectedCategories, buildingFilter, searchQuery]);
+
+  // Clear pending items when user navigates or changes filters
+  useEffect(() => {
+    setPendingNewItems([]);
+  }, [searchQuery, statusFilter, buildingFilter, dateFilter, sortFilter, rawCategories]);
+
+  // Clicking the sliding pill inserts the pending new items into the grid
+  const handleApplyPendingItems = () => {
+    if (pendingNewItems.length === 0) return;
+    setItems((prev) => [...pendingNewItems, ...prev]);
+    setTotalCount((prev) => prev + pendingNewItems.length);
+    setPendingNewItems([]);
+  };
 
   // Handle "Load more" focus management
   useEffect(() => {
@@ -527,6 +585,34 @@ export const Browse: React.FC = () => {
           </AnimatePresence>
         </div>
       </div>
+
+      {/* =========================================================================
+          REALTIME NEW ITEM PILL
+          Slides down from toolbar when matching new item arrives without shifting grid
+          ========================================================================= */}
+      <AnimatePresence>
+        {pendingNewItems.length > 0 && (
+          <motion.div
+            initial={{ opacity: 0, y: -16, scale: 0.96 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: -16, scale: 0.96 }}
+            transition={springs.snappy}
+            className="sticky top-[136px] z-20 flex justify-center py-2"
+          >
+            <button
+              type="button"
+              onClick={handleApplyPendingItems}
+              className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-surface border border-campus-green text-campus-green text-[13px] font-medium hover:bg-green-tint active:scale-98 transition-colors cursor-pointer shadow-subtle"
+              data-testid="realtime-browse-pill"
+            >
+              <span className="w-2 h-2 rounded-full bg-campus-green animate-pulse" />
+              <span>
+                {pendingNewItems.length} {pendingNewItems.length === 1 ? "new item" : "new items"}. Show
+              </span>
+            </button>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* =========================================================================
           RESULTS SECTION

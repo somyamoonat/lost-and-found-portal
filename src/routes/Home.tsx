@@ -9,6 +9,7 @@ import {
 import { collegeConfig } from "@/config/college";
 import { api } from "@/data/api";
 import { type Item } from "@/data/items";
+import { subscribeToNewItems } from "@/data/realtime";
 import { ItemCard, getCategoryIcon } from "@/components/ui/ItemCard";
 import { HowItWorks } from "@/components/home/HowItWorks";
 import { CollectionDesk } from "@/components/home/CollectionDesk";
@@ -63,6 +64,23 @@ export const Home: React.FC = () => {
     loadData();
     return () => {
       isMounted = false;
+    };
+  }, []);
+
+  // Realtime: subscribe to items inserts. New item animates into "Handed in today"
+  useEffect(() => {
+    const unsubscribe = subscribeToNewItems((newItem: Item) => {
+      if (newItem.type === "found") {
+        setNewlyAddedId(newItem.id);
+        setTodayItems((prev) => [newItem, ...prev.filter((i) => i.id !== newItem.id).slice(0, 3)]);
+        setTimeout(() => {
+          setNewlyAddedId(null);
+        }, 1200);
+      }
+    });
+
+    return () => {
+      unsubscribe();
     };
   }, []);
 
