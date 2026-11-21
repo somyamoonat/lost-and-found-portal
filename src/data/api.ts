@@ -10,41 +10,69 @@ const simulateLatency = (): Promise<void> => {
 
 export interface GetItemsFilter {
   query?: string;
-  category?: string;
+  type?: "all" | "lost" | "found";
+  status?: "all" | "open" | "verified" | "returned";
+  categories?: string[];
   building?: string;
-  type?: "lost" | "found";
-  status?: "open" | "verified" | "returned";
+  dateRange?: "today" | "week" | "month" | "any";
+  sort?: "newest" | "oldest";
   limit?: number;
+  offset?: number;
 }
 
 export const api = {
   /**
-   * Retrieves items with simulated latency and optional filtering.
+   * Retrieves items with simulated latency and filtering.
    */
-  async getItems(filter?: GetItemsFilter): Promise<Item[]> {
+  async getItems(filter?: GetItemsFilter): Promise<{ items: Item[]; totalCount: number }> {
     await simulateLatency();
 
     let results = [...placeholderItems];
 
-    if (filter?.type) {
+    // 1. Type filter (all / lost / found)
+    if (filter?.type && filter.type !== "all") {
       results = results.filter((i) => i.type === filter.type);
     }
 
-    if (filter?.status) {
+    // 2. Status filter
+    if (filter?.status && filter.status !== "all") {
       results = results.filter((i) => i.status === filter.status);
     }
 
-    if (filter?.category && filter.category !== "all") {
-      results = results.filter((i) => i.category === filter.category);
+    // 3. Categories multi-select filter
+    if (filter?.categories && filter.categories.length > 0) {
+      const activeCats = filter.categories.filter((c) => c !== "all");
+      if (activeCats.length > 0) {
+        results = results.filter((i) => activeCats.includes(i.category));
+      }
     }
 
+    // 4. Building filter
     if (filter?.building && filter.building !== "all") {
-      const bldg = filter.building;
+      const bldg = filter.building.toLowerCase();
       results = results.filter(
-        (i) => i.buildingCode === bldg || i.location.includes(bldg)
+        (i) =>
+          i.buildingCode.toLowerCase() === bldg ||
+          i.location.toLowerCase().includes(bldg) ||
+          i.id === bldg
       );
     }
 
+    // 5. Date range filter
+    if (filter?.dateRange && filter.dateRange !== "any") {
+      const now = new Date("2026-11-21T12:00:00Z").getTime(); // Consistent benchmark date
+      const oneDay = 24 * 60 * 60 * 1000;
+      results = results.filter((i) => {
+        const itemTime = new Date(i.occurredAt).getTime();
+        const diffDays = (now - itemTime) / oneDay;
+        if (filter.dateRange === "today") return diffDays <= 1.2;
+        if (filter.dateRange === "week") return diffDays <= 7;
+        if (filter.dateRange === "month") return diffDays <= 30;
+        return true;
+      });
+    }
+
+    // 6. Search query filter
     if (filter?.query && filter.query.trim()) {
       const q = filter.query.toLowerCase().trim();
       results = results.filter(
@@ -52,15 +80,30 @@ export const api = {
           i.title.toLowerCase().includes(q) ||
           i.refCode.toLowerCase().includes(q) ||
           i.description.toLowerCase().includes(q) ||
-          i.location.toLowerCase().includes(q)
+          i.location.toLowerCase().includes(q) ||
+          i.category.toLowerCase().includes(q)
       );
     }
 
+    // 7. Sort (newest vs oldest)
+    results.sort((a, b) => {
+      const timeA = new Date(a.occurredAt).getTime();
+      const timeB = new Date(b.occurredAt).getTime();
+      if (filter?.sort === "oldest") {
+        return timeA - timeB;
+      }
+      return timeB - timeA;
+    });
+
+    const totalCount = results.length;
+
+    // 8. Pagination offset and limit
+    const offset = filter?.offset || 0;
     if (filter?.limit && filter.limit > 0) {
-      results = results.slice(0, filter.limit);
+      results = results.slice(offset, offset + filter.limit);
     }
 
-    return results;
+    return { items: results, totalCount };
   },
 
   /**

@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { PlusCircle, ShieldCheck } from "lucide-react";
 import { collegeConfig } from "@/config/college";
 import { Button } from "@/components/ui/Button";
@@ -9,13 +9,21 @@ import { useToast } from "@/motion/Toast";
 
 export const Report: React.FC = () => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { showToast } = useToast();
 
-  const [title, setTitle] = useState("");
+  const initialTitle = searchParams.get("title") || searchParams.get("q") || "";
+  const [title, setTitle] = useState(initialTitle);
   const [category, setCategory] = useState("electronics");
   const [building, setBuilding] = useState("bldg-lib");
   const [email, setEmail] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  React.useEffect(() => {
+    if (initialTitle) {
+      setTitle(initialTitle);
+    }
+  }, [initialTitle]);
 
   const categoryOptions = collegeConfig.categories.map((c) => ({
     value: c.id,

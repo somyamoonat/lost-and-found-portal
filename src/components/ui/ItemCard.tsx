@@ -19,6 +19,7 @@ import { cn } from "@/lib/utils";
 
 interface ItemCardProps {
   item: Item;
+  viewMode?: "grid" | "list";
   className?: string;
 }
 
@@ -29,40 +30,122 @@ interface ItemCardProps {
 export const getCategoryIcon = (category: string) => {
   switch (category) {
     case "electronics":
-      return <Calculator className="w-8 h-8 text-campus-green" strokeWidth={1.5} />;
+      return <Calculator className="w-7 h-7 sm:w-8 sm:h-8 text-campus-green" strokeWidth={1.5} />;
     case "keys":
-      return <Key className="w-8 h-8 text-campus-green" strokeWidth={1.5} />;
+      return <Key className="w-7 h-7 sm:w-8 sm:h-8 text-campus-green" strokeWidth={1.5} />;
     case "bags-backpacks":
-      return <Backpack className="w-8 h-8 text-campus-green" strokeWidth={1.5} />;
+      return <Backpack className="w-7 h-7 sm:w-8 sm:h-8 text-campus-green" strokeWidth={1.5} />;
     case "wallets-ids":
-      return <CreditCard className="w-8 h-8 text-campus-green" strokeWidth={1.5} />;
+      return <CreditCard className="w-7 h-7 sm:w-8 sm:h-8 text-campus-green" strokeWidth={1.5} />;
     case "bottles-mugs":
-      return <Coffee className="w-8 h-8 text-campus-green" strokeWidth={1.5} />;
+      return <Coffee className="w-7 h-7 sm:w-8 sm:h-8 text-campus-green" strokeWidth={1.5} />;
     case "books-stationery":
-      return <BookOpen className="w-8 h-8 text-campus-green" strokeWidth={1.5} />;
+      return <BookOpen className="w-7 h-7 sm:w-8 sm:h-8 text-campus-green" strokeWidth={1.5} />;
     case "eyewear":
-      return <Glasses className="w-8 h-8 text-campus-green" strokeWidth={1.5} />;
+      return <Glasses className="w-7 h-7 sm:w-8 sm:h-8 text-campus-green" strokeWidth={1.5} />;
     case "other":
-      return <Umbrella className="w-8 h-8 text-campus-green" strokeWidth={1.5} />;
+      return <Umbrella className="w-7 h-7 sm:w-8 sm:h-8 text-campus-green" strokeWidth={1.5} />;
     default:
-      return <Package className="w-8 h-8 text-campus-green" strokeWidth={1.5} />;
+      return <Package className="w-7 h-7 sm:w-8 sm:h-8 text-campus-green" strokeWidth={1.5} />;
   }
 };
 
 /**
  * ItemCard Component
- * - 4:3 image area
- * - Title (one line, truncated)
- * - Location and time
- * - StatusChip and reference code in mono
+ * - Grid mode: 4:3 image area, truncated title, location/time, StatusChip, mono code, corner arrow
+ * - List mode: horizontal row, compact 4:3 image block, title/description, StatusChip, mono code
+ * - Morphable via layout / layoutId
  * - Hover: image scales to 1.04 inside overflow-hidden mask over 0.5s, border darkens, corner arrow shifts 3px
  * - Press: scale 0.99
  * - layoutId={`item-image-${id}`} for shared element transition to detail page
  */
-export const ItemCard: React.FC<ItemCardProps> = ({ item, className }) => {
+export const ItemCard: React.FC<ItemCardProps> = ({
+  item,
+  viewMode = "grid",
+  className,
+}) => {
+  const isList = viewMode === "list";
+
+  if (isList) {
+    return (
+      <Link
+        to={`/items/${item.id}`}
+        className="block group outline-none select-none w-full"
+      >
+        <motion.div
+          layout
+          layoutId={`item-card-${item.id}`}
+          whileTap={{ scale: 0.99 }}
+          className={cn(
+            "bg-surface border border-line rounded-[12px] p-3.5 shadow-subtle flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 transition-colors duration-300",
+            "group-hover:border-[#5C6762] group-focus-visible:border-campus-green group-focus-visible:ring-2 group-focus-visible:ring-campus-green",
+            className
+          )}
+        >
+          {/* Left: Compact Image/Category area */}
+          <div className="flex items-center gap-3.5 min-w-0 flex-1">
+            <div className="relative w-24 sm:w-28 aspect-[4/3] rounded-[6px] overflow-hidden bg-paper border border-line/60 shrink-0">
+              <motion.div
+                layoutId={`item-image-${item.id}`}
+                className="w-full h-full flex items-center justify-center bg-[#ECEFEA] transition-transform duration-500 group-hover:scale-[1.04]"
+                style={{
+                  transitionTimingFunction: "cubic-bezier(0.22, 1, 0.36, 1)",
+                }}
+              >
+                {item.photo ? (
+                  <img
+                    src={item.photo}
+                    alt={item.title}
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <div className="flex items-center justify-center">
+                    {getCategoryIcon(item.category)}
+                  </div>
+                )}
+              </motion.div>
+            </div>
+
+            {/* Details */}
+            <div className="space-y-1 min-w-0 flex-1">
+              <div className="flex items-center gap-2">
+                <span className="font-mono text-[11px] font-bold text-ink bg-paper px-1.5 py-0.5 rounded-[4px] border border-line shrink-0">
+                  {item.refCode}
+                </span>
+                <span className="text-[12px] text-ink-muted capitalize truncate">
+                  {item.category.replace("-", " ")}
+                </span>
+              </div>
+
+              <h4 className="text-[15px] font-semibold text-ink leading-snug truncate group-hover:text-campus-green transition-colors">
+                {item.title}
+              </h4>
+
+              <p className="text-[12px] text-ink-muted truncate">
+                {item.location} · {item.timeAgo}
+              </p>
+            </div>
+          </div>
+
+          {/* Right: Status and Action */}
+          <div className="flex sm:flex-col items-center sm:items-end justify-between sm:justify-center gap-2 w-full sm:w-auto shrink-0 pt-2 sm:pt-0 border-t sm:border-t-0 border-line">
+            <StatusChip status={item.status} />
+            <div className="flex items-center gap-1 text-[12px] text-campus-green font-medium">
+              <span>View claim</span>
+              <ArrowUpRight className="w-3.5 h-3.5 transition-transform duration-300 group-hover:translate-x-[3px] group-hover:-translate-y-[3px]" strokeWidth={1.5} />
+            </div>
+          </div>
+        </motion.div>
+      </Link>
+    );
+  }
+
+  // Grid view mode (default)
   return (
-    <Link to={`/items/${item.id}`} className="block group outline-none select-none">
+    <Link to={`/items/${item.id}`} className="block group outline-none select-none h-full">
       <motion.div
+        layout
+        layoutId={`item-card-${item.id}`}
         whileTap={{ scale: 0.99 }}
         className={cn(
           "bg-surface border border-line rounded-[12px] p-3.5 shadow-subtle flex flex-col justify-between h-full transition-colors duration-300",
